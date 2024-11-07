@@ -1,7 +1,6 @@
 import * as d3 from "d3";
-import { ref } from "vue";
 
-interface Point {
+export interface Point {
   x: number;
   y: number;
 }
@@ -12,11 +11,11 @@ export function useSvgCycle() {
   const centerX = ref(300);
   const centerY = ref(300);
   const refDiv = ref<HTMLElement | string>("");
-  const count = ref(3); // 默认绘制6个圆
+  const count = ref(8); // 默认绘制6个圆
   const diffAngle = -90;
   const gapAngle = 16;
   const arrowLength = 10;
-  let circleCoordinate: Point[] = [];
+  const circleCoordinate= ref<Point[]>([]);
   function drawArrow(
     svg: any,
     startX: number,
@@ -95,7 +94,7 @@ export function useSvgCycle() {
         x: centerX.value + Math.cos(arc) * radius.value,
         y: centerY.value + Math.sin(arc) * radius.value,
       };
-      circleCoordinate.push(newRound);
+      circleCoordinate.value.push(newRound);
       const slotCenter = document.createElementNS(
         "http://www.w3.org/2000/svg",
         "text"

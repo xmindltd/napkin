@@ -8,6 +8,7 @@
     <!-- tabindex >= 0 使得双击时聚焦该元素 -->
     <div
       ref="text"
+      :style="style"
       :contenteditable="canEdit"
       :class="{ 'can-edit': canEdit }"
       tabindex="1"
@@ -29,6 +30,55 @@ const props = defineProps({
     default: () => ({}),
   },
 });
+
+const style = computed(() => {
+  let placementStyle = {};
+  switch (props.element.placement) {
+    case "top":
+      placementStyle = { textAlign: "center", verticalAlign: "top" };
+      break;
+    case "bottom":
+      placementStyle = { textAlign: "center", verticalAlign: "bottom" };
+      break;
+    case "left":
+      placementStyle = { textAlign: "left", verticalAlign: "middle" };
+      break;
+    case "right":
+      placementStyle = { textAlign: "right", verticalAlign: "middle" };
+      break;
+    case "top-start":
+      placementStyle = { textAlign: "left", verticalAlign: "top" };
+      break;
+    case "top-end":
+      placementStyle = { textAlign: "right", verticalAlign: "top" };
+      break;
+    case "right-start":
+      placementStyle = { textAlign: "left", verticalAlign: "middle" };
+      break;
+    case "right-end":
+      placementStyle = { textAlign: "right", verticalAlign: "middle" };
+      break;
+    case "bottom-start":
+      placementStyle = { textAlign: "left", verticalAlign: "bottom" };
+      break;
+    case "bottom-end":
+      placementStyle = { textAlign: "right", verticalAlign: "bottom" };
+      break;
+    case "left-start":
+      placementStyle = { textAlign: "left", verticalAlign: "middle" };
+      break;
+    case "left-end":
+      placementStyle = { textAlign: "right", verticalAlign: "middle" };
+      break;
+    default:
+      break;
+  }
+  return {
+    ...placementStyle,
+    ...props.element.style, // 合并外部自定义样式
+  };
+});
+
 const emit = defineEmits(["input"]);
 
 const canEdit = ref(false);
@@ -98,7 +148,7 @@ const handleBlur = (e: Event) => {
   outline: none;
   word-break: break-all;
   padding: 4px;
-  background-color: aliceblue;
+  /* background-color: aliceblue; */
 }
 
 .text .can-edit {
