@@ -1,6 +1,9 @@
 import * as d3 from "d3";
+import { ref } from "vue";
+import { EnumPlacement, type ElementText } from "./type";
+import type { Placement } from "@floating-ui/vue";
 
-export interface Point {
+interface Point {
   x: number;
   y: number;
 }
@@ -15,7 +18,8 @@ export function useSvgCycle() {
   const diffAngle = -90;
   const gapAngle = 16;
   const arrowLength = 10;
-  const circleCoordinate= ref<Point[]>([]);
+  const circleCoordinate = ref<Point[]>([]);
+  const pointAngleList = ref<number[]>([]);
   function drawArrow(
     svg: any,
     startX: number,
@@ -94,6 +98,7 @@ export function useSvgCycle() {
         x: centerX.value + Math.cos(arc) * radius.value,
         y: centerY.value + Math.sin(arc) * radius.value,
       };
+      pointAngleList.value.push(currentAngle - diffAngle);
       circleCoordinate.value.push(newRound);
       const slotCenter = document.createElementNS(
         "http://www.w3.org/2000/svg",
@@ -137,6 +142,232 @@ export function useSvgCycle() {
       drawArrow(svg, startX, startY, endX, endY, largeArcFlag, sweepFlag);
     }
   }
+
+  const getDiffPosition = (
+    originList: Point[],
+    targetRect: { width: number; height: number },
+    elementRect: { width: number; height: number },
+    diffSize: { x: number; y: number } = { x: 0, y: 0 },
+    element: Omit<ElementText, "point"> = {
+      style: {},
+      value: "test",
+      class: "",
+      placement: "top",
+    }
+  ): ElementText[] => {
+    const size = originList.length;
+    const baseWidth = Math.floor(targetRect.width / 2);
+    const baseHeight = Math.floor(targetRect.height / 2);
+    const extraWidth = Math.floor(elementRect.width / 2);
+    const extraHeight = Math.floor(elementRect.height / 2);
+    const diffX = diffSize.x;
+    const diffY = diffSize.y;
+    let newArray: Point[] = [];
+    switch (size) {
+      case 2:
+        newArray = [
+          {
+            x: -(baseWidth + diffX),
+            y: -(baseHeight * 2 + extraHeight + diffY),
+          },
+          { x: -(baseWidth + diffX), y: extraHeight + diffY },
+        ];
+        break;
+      case 3:
+        newArray = [
+          {
+            x: -(baseWidth + diffX),
+            y: -(baseHeight * 2 + extraHeight + diffY),
+          },
+          {
+            x: extraWidth + diffX,
+            y: diffY,
+          },
+          {
+            x: -(baseWidth * 2 + extraWidth + diffX),
+            y: diffY,
+          },
+        ];
+        break;
+      case 4:
+        newArray = [
+          {
+            x: -(baseWidth + diffX),
+            y: -(baseHeight * 2 + extraHeight + diffY),
+          },
+          {
+            x: extraWidth + diffX,
+            y: -(baseHeight + diffY),
+          },
+          {
+            x: -(baseWidth + diffX),
+            y: extraHeight + diffY,
+          },
+          {
+            x: -(baseWidth * 2 + extraWidth + diffX),
+            y: -(baseHeight + diffY),
+          },
+        ];
+        break;
+      case 5:
+        newArray = [
+          {
+            x: -(baseWidth + diffX),
+            y: -(baseHeight * 2 + extraHeight + diffY),
+          },
+          {
+            x: extraWidth + diffX,
+            y: -(baseHeight + diffY),
+          },
+          {
+            x: extraWidth + diffX,
+            y: diffY,
+          },
+          {
+            x: -(baseWidth * 2 + extraWidth + diffX),
+            y: diffY,
+          },
+          {
+            x: -(baseWidth * 2 + extraWidth + diffX),
+            y: -(baseHeight + diffY),
+          },
+        ];
+        break;
+      case 6:
+        newArray = [
+          {
+            x: -(baseWidth + diffX),
+            y: -(baseHeight * 2 + extraHeight + diffY),
+          },
+          {
+            x: extraWidth + diffX,
+            y: -(baseHeight * 2 + diffY),
+          },
+          {
+            x: extraWidth + diffX,
+            y: diffY,
+          },
+          {
+            x: -(baseWidth + diffX),
+            y: extraHeight + diffY,
+          },
+          {
+            x: -(baseWidth * 2 + extraWidth + diffX),
+            y: diffY,
+          },
+          {
+            x: -(baseWidth * 2 + extraWidth + diffX),
+            y: -(baseHeight * 2 + diffY),
+          },
+        ];
+        break;
+      case 7:
+        newArray = [
+          {
+            x: -(baseWidth + diffX),
+            y: -(baseHeight * 2 + extraHeight + diffY),
+          },
+          {
+            x: extraWidth + diffX,
+            y: -(baseHeight * 2 + diffY),
+          },
+          {
+            x: extraWidth + diffX,
+            y: -(baseHeight + diffY),
+          },
+          {
+            x: extraWidth + diffX,
+            y: diffY,
+          },
+          {
+            x: -(baseWidth * 2 + extraWidth + diffX),
+            y: diffY,
+          },
+          {
+            x: -(baseWidth * 2 + extraWidth + diffX),
+            y: -(baseHeight + diffY),
+          },
+          {
+            x: -(baseWidth * 2 + extraWidth + diffX),
+            y: -(baseHeight * 2 + diffY),
+          },
+        ];
+        break;
+      case 8:
+        newArray = [
+          {
+            x: -(baseWidth + diffX),
+            y: -(baseHeight * 2 + extraHeight + diffY),
+          },
+          {
+            x: extraWidth + diffX,
+            y: -(baseHeight * 2 + diffY),
+          },
+          {
+            x: extraWidth + diffX,
+            y: -(baseHeight + diffY),
+          },
+          {
+            x: extraWidth + diffX,
+            y: diffY,
+          },
+          {
+            x: -(baseWidth + diffX),
+            y: extraHeight + diffY,
+          },
+          {
+            x: -(baseWidth * 2 + extraWidth + diffX),
+            y: diffY,
+          },
+          {
+            x: -(baseWidth * 2 + extraWidth + diffX),
+            y: -(baseHeight + diffY),
+          },
+          {
+            x: -(baseWidth * 2 + extraWidth + diffX),
+            y: -(baseHeight * 2 + diffY),
+          },
+        ];
+        break;
+      default:
+        newArray = new Array(size).fill({ x: 0, y: 0 });
+    }
+    return newArray.map((diffPoint: Point, index: number) => {
+      const newElement = {
+        ...element,
+        value: `${pointAngleList.value[index]}-${index}`,
+        placement: getPlacement(pointAngleList.value[index]),
+      };
+      return {
+        point: {
+          x: diffPoint.x + originList[index].x,
+          y: diffPoint.y + originList[index].y,
+        },
+        ...newElement,
+      };
+    });
+  };
+
+  const getPlacement = (angle: number): Placement => {
+    if (angle == 0) return EnumPlacement.Bottom;
+    if (angle > 0 && angle < 45) return EnumPlacement.LeftStart;
+    if (angle === 45 || angle === 60) return EnumPlacement.BottomStart;
+    if (angle > 45 && angle < 90) return EnumPlacement.Left;
+    if (angle === 90) return EnumPlacement.Left;
+    if (angle > 90 && angle < 135) return EnumPlacement.TopStart;
+    if (angle === 135) return EnumPlacement.TopStart;
+    if (angle > 135 && angle < 180) return EnumPlacement.TopStart;
+    if (angle === 180) return EnumPlacement.Top;
+    if (angle > 180 && angle < 225) return EnumPlacement.TopEnd;
+    if (angle === 225) return EnumPlacement.TopEnd;
+    if (angle > 225 && angle < 270) return EnumPlacement.TopEnd;
+    if (angle === 270) return EnumPlacement.Right;
+    if (angle === 300) return EnumPlacement.BottomEnd;
+    if (angle > 270 && angle < 315) return EnumPlacement.RightEnd;
+    if (angle === 315) return EnumPlacement.BottomEnd;
+    return EnumPlacement.Bottom;
+  };
+
   watch([radius, radiusChildren, centerX, centerY, count], (newRadius) => {
     radius.value = +newRadius[0];
     radiusChildren.value = +newRadius[1];
@@ -148,6 +379,7 @@ export function useSvgCycle() {
       render(refDiv.value);
     }
   });
+
   return {
     radius,
     radiusChildren,
@@ -156,5 +388,6 @@ export function useSvgCycle() {
     count,
     render,
     circleCoordinate,
+    getDiffPosition,
   };
 }
