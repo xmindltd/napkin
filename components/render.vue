@@ -3,12 +3,12 @@
   <div class="flex flex-1 relative justify-center" ref="svgContainer">
     <div v-for="element in elementList">
       <vue-draggable-resizable
-        style="border: none"
+        class="overflow-auto hidden-scrollbar !border-none"
+        :draggable="false"
         :x="element.point.x"
         :y="element.point.y"
         :w="100"
         :h="100"
-        :parent="true"
       >
         <Text
           :element="element"
@@ -33,6 +33,7 @@ const {
   render,
   circleCoordinate,
   getDiffPosition,
+  getSvgContainer,
 } = useSvgCycle();
 const elementList = computed(() => {
   return getDiffPosition(
@@ -44,7 +45,10 @@ const elementList = computed(() => {
 });
 onMounted(() => {
   if (svgContainer.value) {
-    render(svgContainer.value);
+    const rect = getSvgContainer(svgContainer.value).getBoundingClientRect();
+    centerX.value = rect.width / 2;
+    centerY.value = rect.height / 2 - 20;
+    render();
   }
 });
 </script>
@@ -65,7 +69,7 @@ onMounted(() => {
 
 .arrow-path {
   stroke: black;
-  stroke-width: 3;
+  stroke-width: 1;
   fill: none;
   marker-end: url(#arrowhead);
 }

@@ -5,7 +5,6 @@
     @keydown="handleKeydown"
     @keyup="handleKeyup"
   >
-    <!-- tabindex >= 0 使得双击时聚焦该元素 -->
     <div
       ref="text"
       :style="style"
@@ -113,7 +112,7 @@ const handleKeydown = (e: Event) => {
 
 const handleKeyup = (e: Event) => {};
 const handleMousedown = (e: Event) => {
-  e.stopPropagation();
+  // e.stopPropagation();
 };
 
 const clearStyle = (e: ClipboardEvent) => {
@@ -139,6 +138,7 @@ const handleBlur = (e: Event) => {
   width: 100%;
   height: 100%;
   display: table;
+  overflow: auto;
 }
 
 .text div {

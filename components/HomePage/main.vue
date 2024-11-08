@@ -1,7 +1,24 @@
 <template>
   <div class="flex w-full flex-col h-full">
     <div class="flex w-full h-3/4 bg-white rounded-3xl p-4">
-      <div class="flex flex-1"></div>
+      <div class="flex flex-1 relative">
+        <vue-draggable-resizable
+          class="!bg-transparent"
+          :class="
+            active
+              ? '!border !border-solid !border-[#1ac6ff] handle'
+              : '!border-none'
+          "
+          :parent="true"
+          v-model:active="active"
+          draggable="true"
+        >
+          <Text
+            :element="textElement"
+            @input="(newValue: string) => (textElement.value = newValue)"
+          />
+        </vue-draggable-resizable>
+      </div>
       <div class="flex flex-1">
         <Render />
       </div>
@@ -47,6 +64,7 @@
   </div>
 </template>
 <script setup lang="ts">
+import VueDraggableResizable from "vue-draggable-resizable";
 const generateInputRef = ref();
 const input = ref("");
 defineExpose({
@@ -54,6 +72,14 @@ defineExpose({
     generateInputRef.value?.focus();
   },
 });
+const textElement = ref<ElementText>({
+  point: { x: 0, y: 0 },
+  style: {},
+  value: "TEST",
+  class: "",
+  placement: "top",
+});
+const active = ref(false);
 const updateModelValue = (value: string) => {
   input.value = value;
 };
@@ -71,3 +97,9 @@ const onPaste = async () => {
   console.log("paste");
 };
 </script>
+<style>
+.handle > .handle {
+  border-radius: 2px !important;
+  background-color: #1ac6ff !important;
+}
+</style>

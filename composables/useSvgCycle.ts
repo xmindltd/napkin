@@ -13,7 +13,7 @@ export function useSvgCycle() {
   const radiusChildren = ref(25);
   const centerX = ref(300);
   const centerY = ref(300);
-  const refDiv = ref<HTMLElement | string>("");
+  const refDiv = ref<HTMLElement | null>(null);
   const count = ref(8); // 默认绘制6个圆
   const diffAngle = -90;
   const gapAngle = 16;
@@ -34,7 +34,7 @@ export function useSvgCycle() {
       .append("path")
       .attr("d", arrowPath)
       .attr("stroke", "black")
-      .attr("stroke-width", 2)
+      .attr("stroke-width", 1)
       .attr("fill", "none")
       .classed("arrow-path", true);
   }
@@ -60,10 +60,16 @@ export function useSvgCycle() {
     }
   }
 
-  function render(div: HTMLElement | string, slot?: any) {
-    d3.select(div).selectAll("*").remove();
+  function getSvgContainer(div: HTMLElement) {
     refDiv.value = div;
-    const svgContainer = d3.select(div);
+    return refDiv.value;
+  }
+
+  function render(slot?: any) {
+    if (!refDiv.value) return;
+    d3.select(refDiv.value).selectAll("*").remove();
+    refDiv.value = refDiv.value;
+    const svgContainer = d3.select(refDiv.value);
 
     const svg = svgContainer
       .append("svg")
@@ -90,7 +96,7 @@ export function useSvgCycle() {
     const totalAngle = 360 / count.value; // 均分每一个角度
     const arrowAngle = totalAngle - 2 * gapAngle;
     const arrowAngleOffset = (arrowLength / (2 * Math.PI * radius.value)) * 360;
-
+    circleCoordinate.value = [];
     for (let i = 0; i < count.value; i++) {
       const currentAngle = totalAngle * i + diffAngle; // 当前角度
       const arc = currentAngle * (Math.PI / 180); // 转化成弧度
@@ -374,9 +380,8 @@ export function useSvgCycle() {
     centerX.value = +newRadius[2];
     centerY.value = +newRadius[3];
     count.value = +newRadius[4];
-    console.log("render");
     if (refDiv.value) {
-      render(refDiv.value);
+      render();
     }
   });
 
@@ -389,5 +394,6 @@ export function useSvgCycle() {
     render,
     circleCoordinate,
     getDiffPosition,
+    getSvgContainer,
   };
 }
