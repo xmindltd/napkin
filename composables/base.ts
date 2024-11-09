@@ -8,7 +8,10 @@ export default class RenderSvgBase {
     renderSvgTasks.push(this);
   }
 
-  init(svg: any, div: HTMLElement) {
+  init(
+    svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
+    div: HTMLElement
+  ) {
     this.svg.value = svg;
     this.svgContainer.value = div;
   }
