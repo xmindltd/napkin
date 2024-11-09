@@ -1,43 +1,19 @@
 import * as d3 from "d3";
 import { ref } from "vue";
-import type { ElementText, Point } from "./type";
-import { EnumPlacement } from "./type";
-import RenderSvgBase from "./base";
-
-export class RenderSvgCycle extends RenderSvgBase {
-  diffAngle = -90;
-  gapAngle = 16;
-  arrowLength = 10;
-  data = ref({
-    centerX: 200,
-    centerY: 200,
-    radius: 140,
-    count: 8,
-    radiusChildren: 25,
-  });
-  circleCoordinate = ref<Point[]>([]);
-  pointAngleList = ref<number[]>([]);
-  constructor() {
-    super();
-  }
-
-  drawCircle(cx: number, cy: number, r: number, className: string, slot?: any) {
-    if (!this.svg.value) return;
-    const svg = this.svg.value;
-    const group = svg.append("g").attr("transform", `translate(${cx}, ${cy})`); // 将 <g> 元素移到圆心
-    svg
-      .append("circle")
-      .attr("cx", cx)
-      .attr("cy", cy)
-      .attr("r", r)
-      .classed(className, true);
-    if (slot) {
-      const slotElement = d3.select(slot).node();
-      group.node()?.appendChild(slotElement);
-    }
-  }
-
-  drawArrow(
+export function useSvgCycle() {
+  const radius = ref(140);
+  const radiusChildren = ref(25);
+  const centerX = ref(300);
+  const centerY = ref(300);
+  const refDiv = ref<HTMLElement | null>(null);
+  const count = ref(8); // 默认绘制6个圆
+  const diffAngle = -90;
+  const gapAngle = 16;
+  const arrowLength = 10;
+  const circleCoordinate = ref<Point[]>([]);
+  const pointAngleList = ref<number[]>([]);
+  function drawArrow(
+    svg: any,
     startX: number,
     startY: number,
     endX: number,
@@ -45,10 +21,7 @@ export class RenderSvgCycle extends RenderSvgBase {
     largeArcFlag: number = 1,
     sweepFlag = 1
   ) {
-    if (!this.svg.value) return;
-    const svg = this.svg.value;
-    const { radius } = this.data.value;
-    const arrowPath = `M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} ${sweepFlag} ${endX} ${endY}`;
+    const arrowPath = `M ${startX} ${startY} A ${radius.value} ${radius.value} 0 ${largeArcFlag} ${sweepFlag} ${endX} ${endY}`;
     svg
       .append("path")
       .attr("d", arrowPath)
@@ -58,20 +31,45 @@ export class RenderSvgCycle extends RenderSvgBase {
       .classed("arrow-path", true);
   }
 
-  render() {
-    if (!this.svg.value) return;
-    if (this.svgContainer.value) {
-      this.data.value.centerX = this.svgContainer.value.clientWidth / 2;
-      this.data.value.centerY = this.svgContainer.value.clientHeight / 2;
+  function drawCircle(
+    svg: any,
+    cx: number,
+    cy: number,
+    r: number,
+    className: string,
+    slot?: any
+  ) {
+    const group = svg.append("g").attr("transform", `translate(${cx}, ${cy})`); // 将 <g> 元素移到圆心
+    svg
+      .append("circle")
+      .attr("cx", cx)
+      .attr("cy", cy)
+      .attr("r", r)
+      .classed(className, true);
+    if (slot) {
+      const slotElement = d3.select(slot).node();
+      group.node().appendChild(slotElement);
     }
-    const svg = this.svg.value;
-    const { centerX, centerY, radius, count, radiusChildren } = toRefs(
-      this.data.value
-    );
-    const arrowLength = this.arrowLength;
-    const gapAngle = this.gapAngle;
-    const diffAngle = this.diffAngle;
-    this.destroy();
+  }
+
+  function getSvgContainer(div: HTMLElement) {
+    refDiv.value = div;
+    return refDiv.value;
+  }
+
+  function render(slot?: any) {
+    if (!refDiv.value) return;
+    d3.select(refDiv.value).selectAll("*").remove();
+    refDiv.value = refDiv.value;
+    const svgContainer = d3.select(refDiv.value);
+
+    const svg = svgContainer
+      .append("svg")
+      .attr("width", "100%")
+      .attr("height", "100%")
+      .classed("bg", true);
+
+    // 添加 defs 和箭头形状
     const defs = svg.append("defs");
     const marker = defs
       .append("marker")
@@ -86,11 +84,11 @@ export class RenderSvgCycle extends RenderSvgBase {
       .append("polygon")
       .attr("points", "0 0, 6 2, 0 4")
       .attr("fill", "black");
-    this.drawCircle(centerX.value, centerY.value, radius.value, "main-round");
+    drawCircle(svg, radius.value, radius.value, radius.value, "main-round");
     const totalAngle = 360 / count.value; // 均分每一个角度
     const arrowAngle = totalAngle - 2 * gapAngle;
     const arrowAngleOffset = (arrowLength / (2 * Math.PI * radius.value)) * 360;
-    this.circleCoordinate.value = [];
+    circleCoordinate.value = [];
     for (let i = 0; i < count.value; i++) {
       const currentAngle = totalAngle * i + diffAngle; // 当前角度
       const arc = currentAngle * (Math.PI / 180); // 转化成弧度
@@ -98,8 +96,8 @@ export class RenderSvgCycle extends RenderSvgBase {
         x: centerX.value + Math.cos(arc) * radius.value,
         y: centerY.value + Math.sin(arc) * radius.value,
       };
-      this.pointAngleList.value.push(currentAngle - diffAngle);
-      this.circleCoordinate.value.push(newRound);
+      pointAngleList.value.push(currentAngle - diffAngle);
+      circleCoordinate.value.push(newRound);
       const slotCenter = document.createElementNS(
         "http://www.w3.org/2000/svg",
         "text"
@@ -110,7 +108,8 @@ export class RenderSvgCycle extends RenderSvgBase {
       slotCenter.setAttribute("dominant-baseline", "central");
       slotCenter.textContent = "center";
 
-      this.drawCircle(
+      drawCircle(
+        svg,
         newRound.x,
         newRound.y,
         radiusChildren.value,
@@ -138,11 +137,11 @@ export class RenderSvgCycle extends RenderSvgBase {
 
       const largeArcFlag = arrowAngle > 180 ? 1 : 0;
       const sweepFlag = 1;
-      this.drawArrow(startX, startY, endX, endY, largeArcFlag, sweepFlag);
+      drawArrow(svg, startX, startY, endX, endY, largeArcFlag, sweepFlag);
     }
   }
 
-  getDiffPosition(
+  const getDiffPosition = (
     originList: Point[],
     targetRect: { width: number; height: number },
     elementRect: { width: number; height: number },
@@ -153,7 +152,7 @@ export class RenderSvgCycle extends RenderSvgBase {
       class: "",
       placement: "top",
     }
-  ): ElementText[] {
+  ): ElementText[] => {
     const size = originList.length;
     const baseWidth = Math.floor(targetRect.width / 2);
     const baseHeight = Math.floor(targetRect.height / 2);
@@ -161,7 +160,6 @@ export class RenderSvgCycle extends RenderSvgBase {
     const extraHeight = Math.floor(elementRect.height / 2);
     const diffX = diffSize.x;
     const diffY = diffSize.y;
-    const pointAngleList = this.pointAngleList.value;
     let newArray: Point[] = [];
     switch (size) {
       case 2:
@@ -333,11 +331,10 @@ export class RenderSvgCycle extends RenderSvgBase {
         newArray = new Array(size).fill({ x: 0, y: 0 });
     }
     return newArray.map((diffPoint: Point, index: number) => {
-      const _this = this;
       const newElement = {
         ...element,
-        value: `${pointAngleList[index]}-${index}`,
-        placement: _this.getPlacement(pointAngleList[index]),
+        value: `${pointAngleList.value[index]}-${index}`,
+        placement: getPlacement(pointAngleList.value[index]),
       };
       return {
         point: {
@@ -347,9 +344,9 @@ export class RenderSvgCycle extends RenderSvgBase {
         ...newElement,
       };
     });
-  }
+  };
 
-  getPlacement(angle: number): Placement {
+  const getPlacement = (angle: number): Placement => {
     if (angle == 0) return EnumPlacement.Bottom;
     if (angle > 0 && angle < 45) return EnumPlacement.LeftStart;
     if (angle === 45 || angle === 60) return EnumPlacement.BottomStart;
@@ -367,17 +364,28 @@ export class RenderSvgCycle extends RenderSvgBase {
     if (angle > 270 && angle < 315) return EnumPlacement.RightEnd;
     if (angle === 315) return EnumPlacement.BottomEnd;
     return EnumPlacement.Bottom;
-  }
-}
+  };
 
-export const svgCycle = new RenderSvgCycle();
+  watch([radius, radiusChildren, centerX, centerY, count], (newRadius) => {
+    radius.value = +newRadius[0];
+    radiusChildren.value = +newRadius[1];
+    centerX.value = +newRadius[2];
+    centerY.value = +newRadius[3];
+    count.value = +newRadius[4];
+    if (refDiv.value) {
+      render();
+    }
+  });
 
-export function useSvgCycle() {
   return {
-    data: svgCycle.data,
-    render: svgCycle.render,
-    getDiffPosition: svgCycle.getDiffPosition.bind(svgCycle),
-    getPlacement: svgCycle.getPlacement,
-    circleCoordinate: svgCycle.circleCoordinate,
+    radius,
+    radiusChildren,
+    centerX,
+    centerY,
+    count,
+    render,
+    circleCoordinate,
+    getDiffPosition,
+    getSvgContainer,
   };
 }

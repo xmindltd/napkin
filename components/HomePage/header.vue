@@ -17,6 +17,6 @@
     </div>
   </div>
 </template>
-<script>
-import IconHeaderAdd from "~/assets/icons/header-add.svg?component";
+<script setup lang="ts">
+// import IconHeaderAdd from "~/assets/icons/header-add.svg?component";
 </script>
